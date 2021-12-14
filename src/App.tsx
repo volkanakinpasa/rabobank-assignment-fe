@@ -9,7 +9,7 @@ function App() {
   const { SIGN_UP } = LINKS;
   return (
     <div className="App">
-      <header className="App-header">RABOBANK </header>
+      <header className="App-header">RABOBANK Logo</header>
       <main>
         <Router>
           <Routes>
