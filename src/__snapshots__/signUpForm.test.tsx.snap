@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SignUpForm component creates form snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="signup-container"
+  >
+    <form>
+      <label
+        for="firstName"
+      >
+        First Name
+      </label>
+      <input
+        autocomplete="name"
+        id="firstName"
+        name="firstName"
+        placeholder="First Name"
+        type="text"
+      />
+      <label
+        for="lastName"
+      >
+        Last Name
+      </label>
+      <input
+        id="lastName"
+        name="lastName"
+        placeholder="Last Name"
+        type="text"
+      />
+      <label
+        for="email"
+      >
+        Email
+      </label>
+      <input
+        autocomplete="email"
+        id="email"
+        name="email"
+        placeholder="Email"
+        type="text"
+      />
+      <label
+        for="password"
+      >
+        Password
+      </label>
+      <input
+        autocomplete="current-password"
+        data-testid="password"
+        id="password"
+        name="password"
+        placeholder="Password"
+        type="password"
+      />
+      <button
+        color="primary"
+        type="submit"
+      >
+        Sign Up
+      </button>
+    </form>
+  </div>
+</DocumentFragment>
+`;

@@ -1,15 +1,18 @@
 import './style.css';
 
+import { FORM_INPUT_IDS, FORM_INPUT_NAMES, MESSAGES } from '../constants';
 import { get, post } from '../api/users';
 
 import ISignUpForm from '../interfaces/ISignUpForm';
 import IUser from '../interfaces/IUser';
+import Loading from './Loading';
+import SignedUp from './SignedUp';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 
 export default function SignUpForm() {
   const [loading, setLoading] = useState<boolean>(false);
-  const [hideForm, setHideForm] = useState<boolean>(false);
+  const [showForm, setShowForm] = useState<boolean>(true);
   const [showSignedUp, setShowSignedUp] = useState<boolean>(false);
 
   const {
@@ -22,11 +25,22 @@ export default function SignUpForm() {
   const validatePassword = (password: string): boolean => {
     const { firstName, lastName } = getValues();
 
-    return (
-      /(?=.*[a-z])(?=.*[A-Z])/.test(password) &&
-      password.toLowerCase().indexOf(firstName.toLowerCase()) === -1 &&
-      password.toLowerCase().indexOf(lastName.toLowerCase()) === -1
-    );
+    //what does Should contain lower and uppercase letters mean?. should it contain numbers? or do you mean only accepts lowercase and uppercase?
+    // /(?=.*[a-z])(?=.*[A-Z])/.test(password) &&
+
+    if (
+      firstName.length > 0 &&
+      password.toLowerCase().indexOf(firstName.toLowerCase()) > -1
+    ) {
+      return false;
+    } else if (
+      lastName.length > 0 &&
+      password.toLowerCase().indexOf(lastName.toLowerCase()) > -1
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   const onSubmit = async (data: ISignUpForm) => {
@@ -39,85 +53,108 @@ export default function SignUpForm() {
         const users: IUser[] = await get(result._id);
 
         console.log(users);
-        setHideForm(true);
+        setShowForm(false);
         setShowSignedUp(true);
       }, 4000);
     } catch {
       setLoading(false);
-    } finally {
     }
   };
 
+  const Label = ({
+    name,
+    labelFor,
+  }: {
+    name: string;
+    labelFor: string;
+  }): JSX.Element => <label htmlFor={labelFor}>{name}</label>;
+
+  const { ERRORS, EMAIL_PATTERN } = MESSAGES;
+  const {
+    FIRST_NAME_REQUIRED,
+    LAST_NAME_REQUIRED,
+    EMAIL_REQUIRED,
+    EMAIL_INVALID,
+    PASSWORD_REQUIRED,
+    PASSWORD_MIN,
+    PASSWORD_VALIDATE,
+  } = ERRORS;
+
+  const { FIRST_NAME, LAST_NAME, EMAIL, PASSWORD } = FORM_INPUT_NAMES;
+
   return (
     <div className="signup-container">
-      {!hideForm && (
-        <form noValidate onSubmit={handleSubmit(onSubmit)}>
-          <label>First Name</label>
+      {showForm && (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Label name={FIRST_NAME} labelFor={FORM_INPUT_IDS.FIRST_NAME} />
           <input
-            autoComplete="name"
+            id={FORM_INPUT_IDS.FIRST_NAME}
             type="text"
-            id="firstName"
-            placeholder="First Name"
-            {...register('firstName', {
-              required: true,
+            placeholder={FIRST_NAME}
+            autoComplete="name"
+            {...register(`firstName`, {
+              required: FIRST_NAME_REQUIRED,
             })}
           />
           {errors.firstName && (
-            <span>
-              <p>First name is required</p>
-            </span>
+            <div>
+              <p>{errors.firstName.message}</p>
+            </div>
           )}
-          <label>Last Name</label>
+
+          <Label name={LAST_NAME} labelFor={FORM_INPUT_IDS.LAST_NAME} />
           <input
+            id={FORM_INPUT_IDS.LAST_NAME}
             type="text"
-            id="lastName"
-            placeholder="Last Name"
+            placeholder={LAST_NAME}
             {...register('lastName', {
-              required: true,
+              required: LAST_NAME_REQUIRED,
             })}
           />
           {errors.lastName && (
-            <span>
-              <p>Last name is required</p>
-            </span>
+            <div>
+              <p>{errors.lastName.message}</p>
+            </div>
           )}
-          <label>Email</label>
+          <Label name={EMAIL} labelFor={FORM_INPUT_IDS.EMAIL} />
           <input
-            id="email"
-            autoComplete="email"
+            id={FORM_INPUT_IDS.EMAIL}
             type="text"
-            placeholder="Email"
+            autoComplete={FORM_INPUT_IDS.EMAIL}
+            placeholder={EMAIL}
             {...register('email', {
-              required: 'Email is required',
+              required: EMAIL_REQUIRED,
               pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                message: 'Email is invalid',
+                value: EMAIL_PATTERN,
+                message: EMAIL_INVALID,
               },
             })}
           />
           {errors.email && (
-            <span>
-              <p>{errors.email?.message}</p>
-            </span>
+            <div>
+              <p>{errors.email.message}</p>
+            </div>
           )}
-          <label>Password</label>
+          <Label name={PASSWORD} labelFor={FORM_INPUT_IDS.PASSWORD} />
           <input
             type="password"
-            id="password"
+            id={FORM_INPUT_IDS.PASSWORD}
             autoComplete="current-password"
-            placeholder="Password"
+            placeholder={PASSWORD}
+            data-testid={FORM_INPUT_IDS.PASSWORD}
             {...register('password', {
-              required: true,
-              minLength: 8,
+              required: PASSWORD_REQUIRED,
+              minLength: { value: 8, message: PASSWORD_MIN },
               validate: validatePassword,
             })}
           />
           {errors.password && (
-            <span>
-              <p>Enter min 8 charters</p>
-              <p>Should contain at least one lower and uppercase</p>
-              <p>Should not contain first name and last name</p>
-            </span>
+            <div>
+              <p>{errors.password.message}</p>
+              {errors.password.type === 'validate' && (
+                <p>{PASSWORD_VALIDATE}</p>
+              )}
+            </div>
           )}
 
           {!loading && (
@@ -125,10 +162,11 @@ export default function SignUpForm() {
               Sign Up
             </button>
           )}
-          {loading && <div className="loading">Loading</div>}
+
+          {loading && <Loading />}
         </form>
       )}
-      {showSignedUp && <span className="signedup">Signed up!</span>}
+      {showSignedUp && <SignedUp />}
     </div>
   );
 }
