@@ -1,4 +1,4 @@
-const API_URL = 'https://demo-api.now.sh';
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const LINKS = {
   SIGN_UP: '/',

@@ -2,6 +2,7 @@ import './style.css';
 
 import { FORM_INPUT_IDS, FORM_INPUT_NAMES, MESSAGES } from '../constants';
 import { get, post } from '../api/users';
+import { timeout, validatePassword } from '../helper';
 
 import ISignUpForm from '../interfaces/ISignUpForm';
 import IUser from '../interfaces/IUser';
@@ -22,25 +23,9 @@ export default function SignUpForm() {
     getValues,
   } = useForm<ISignUpForm>();
 
-  const validatePassword = (password: string): boolean => {
+  const handleValidate = (password: string): boolean => {
     const { firstName, lastName } = getValues();
-
-    //what does Should contain lower and uppercase letters mean?. should it contain numbers? or do you mean only accepts lowercase and uppercase?
-    // /(?=.*[a-z])(?=.*[A-Z])/.test(password) &&
-
-    if (
-      firstName.length > 0 &&
-      password.toLowerCase().indexOf(firstName.toLowerCase()) > -1
-    ) {
-      return false;
-    } else if (
-      lastName.length > 0 &&
-      password.toLowerCase().indexOf(lastName.toLowerCase()) > -1
-    ) {
-      return false;
-    } else {
-      return true;
-    }
+    return validatePassword(password, firstName, lastName);
   };
 
   const onSubmit = async (data: ISignUpForm) => {
@@ -49,25 +34,16 @@ export default function SignUpForm() {
       const result: IUser = await post(data);
       console.log(result);
 
-      setTimeout(async () => {
-        const users: IUser[] = await get(result._id);
+      await timeout(4000);
 
-        console.log(users);
-        setShowForm(false);
-        setShowSignedUp(true);
-      }, 4000);
+      const users: IUser[] = await get(result._id);
+      console.log(users);
+      setShowForm(false);
+      setShowSignedUp(true);
     } catch {
       setLoading(false);
     }
   };
-
-  const Label = ({
-    name,
-    labelFor,
-  }: {
-    name: string;
-    labelFor: string;
-  }): JSX.Element => <label htmlFor={labelFor}>{name}</label>;
 
   const { ERRORS, EMAIL_PATTERN } = MESSAGES;
   const {
@@ -86,7 +62,6 @@ export default function SignUpForm() {
     <div className="signup-container">
       {showForm && (
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Label name={FIRST_NAME} labelFor={FORM_INPUT_IDS.FIRST_NAME} />
           <input
             id={FORM_INPUT_IDS.FIRST_NAME}
             type="text"
@@ -102,7 +77,6 @@ export default function SignUpForm() {
             </div>
           )}
 
-          <Label name={LAST_NAME} labelFor={FORM_INPUT_IDS.LAST_NAME} />
           <input
             id={FORM_INPUT_IDS.LAST_NAME}
             type="text"
@@ -116,7 +90,6 @@ export default function SignUpForm() {
               <p>{errors.lastName.message}</p>
             </div>
           )}
-          <Label name={EMAIL} labelFor={FORM_INPUT_IDS.EMAIL} />
           <input
             id={FORM_INPUT_IDS.EMAIL}
             type="text"
@@ -135,7 +108,6 @@ export default function SignUpForm() {
               <p>{errors.email.message}</p>
             </div>
           )}
-          <Label name={PASSWORD} labelFor={FORM_INPUT_IDS.PASSWORD} />
           <input
             type="password"
             id={FORM_INPUT_IDS.PASSWORD}
@@ -145,7 +117,7 @@ export default function SignUpForm() {
             {...register('password', {
               required: PASSWORD_REQUIRED,
               minLength: { value: 8, message: PASSWORD_MIN },
-              validate: validatePassword,
+              validate: handleValidate,
             })}
           />
           {errors.password && (

@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import IUser from './interfaces/IUser';
 import { MESSAGES } from './constants';
 import SignUpForm from './components/SignUpForm';
+import { timeout } from './helper';
 import userEvent from '@testing-library/user-event';
 
 const { ERRORS } = MESSAGES;
@@ -127,7 +128,3 @@ describe('SignUpForm component', () => {
     );
   });
 });
-
-function timeout(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
