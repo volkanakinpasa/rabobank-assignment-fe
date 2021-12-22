@@ -1,7 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { FORM_INPUT_IDS, FORM_INPUT_NAMES, MESSAGES } from './constants';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 
 import IUser from './interfaces/IUser';
-import { MESSAGES } from './constants';
 import SignUpForm from './components/SignUpForm';
 import { timeout } from './helper';
 import userEvent from '@testing-library/user-event';
@@ -16,6 +22,8 @@ const {
   PASSWORD_MIN,
   PASSWORD_VALIDATE,
 } = ERRORS;
+
+const { FIRST_NAME, LAST_NAME, EMAIL, PASSWORD } = FORM_INPUT_NAMES;
 
 jest.mock('./api/users', () => ({
   post: () =>
@@ -43,11 +51,6 @@ jest.mock('./api/users', () => ({
 jest.setTimeout(60000);
 
 describe('SignUpForm component', () => {
-  it('creates form snapshot', () => {
-    const { asFragment } = render(<SignUpForm />);
-    expect(asFragment()).toMatchSnapshot();
-  });
-
   it('shows required error messages when form submitted', async () => {
     render(<SignUpForm />);
 
@@ -61,8 +64,18 @@ describe('SignUpForm component', () => {
   });
 
   it('shows email is invalid when email has no @', async () => {
-    render(<SignUpForm />);
-    userEvent.type(screen.getByRole('textbox', { name: 'Email' }), 'test');
+    // const { getByTestId } = render(<SignUpForm />);
+    // const emailInput: any = getByTestId(FORM_INPUT_IDS.EMAIL);
+    // userEvent.type(emailInput, 'test');
+    // userEvent.click(screen.getByText(/Sign Up/i));
+    // await waitFor(() => {
+    //   expect(screen.getByText(EMAIL_INVALID)).toBeInTheDocument();
+    //   screen.debug();
+    // });
+
+    const { getByPlaceholderText } = render(<SignUpForm />);
+    const emailInput = getByPlaceholderText(EMAIL);
+    userEvent.type(emailInput, 'test');
     userEvent.click(screen.getByText(/Sign Up/i));
     await waitFor(() => {
       expect(screen.getByText(EMAIL_INVALID)).toBeInTheDocument();
@@ -79,11 +92,9 @@ describe('SignUpForm component', () => {
   });
 
   it('shows password error message when first name exist in', async () => {
-    render(<SignUpForm />);
-    userEvent.type(
-      screen.getByRole('textbox', { name: 'First Name' }),
-      'fname'
-    );
+    const { getByPlaceholderText } = render(<SignUpForm />);
+
+    userEvent.type(getByPlaceholderText(FIRST_NAME), 'fname');
     userEvent.type(screen.getByTestId('password'), 'fnameSDFGHJ');
     userEvent.click(screen.getByText(/Sign Up/i));
     await waitFor(() => {
@@ -92,8 +103,9 @@ describe('SignUpForm component', () => {
   });
 
   it('shows password error message when last name exist in', async () => {
-    render(<SignUpForm />);
-    userEvent.type(screen.getByRole('textbox', { name: 'Last Name' }), 'lname');
+    const { getByPlaceholderText } = render(<SignUpForm />);
+
+    userEvent.type(getByPlaceholderText(LAST_NAME), 'lname');
     userEvent.type(screen.getByTestId('password'), 'lnameSDFGHJ');
     userEvent.click(screen.getByText(/Sign Up/i));
     await waitFor(() => {
@@ -102,29 +114,21 @@ describe('SignUpForm component', () => {
   });
 
   it('submits form', async () => {
-    render(<SignUpForm />);
+    const { getByPlaceholderText } = render(<SignUpForm />);
 
-    userEvent.type(
-      screen.getByRole('textbox', { name: 'First Name' }),
-      'firstName'
-    );
-    userEvent.type(
-      screen.getByRole('textbox', { name: 'Last Name' }),
-      'lastName'
-    );
-    userEvent.type(
-      screen.getByRole('textbox', { name: 'Email' }),
-      'test@test.com'
-    );
+    userEvent.type(getByPlaceholderText(FIRST_NAME), 'firstName');
+
+    userEvent.type(getByPlaceholderText(LAST_NAME), 'lastName');
+    userEvent.type(getByPlaceholderText(EMAIL), 'test@test.com');
     userEvent.type(screen.getByTestId('password'), 'qwertyuiosdf');
     userEvent.click(screen.getByText(/Sign Up/i));
 
     await waitFor(
       async () => {
-        await timeout(4000);
+        await timeout(4100);
         expect(screen.getByText('Signed up!')).toBeInTheDocument();
       },
-      { timeout: 40000 }
+      { timeout: 5000 }
     );
   });
 });

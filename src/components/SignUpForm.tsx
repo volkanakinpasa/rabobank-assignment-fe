@@ -32,12 +32,10 @@ export default function SignUpForm() {
     try {
       setLoading(true);
       const result: IUser = await post(data);
-      console.log(result);
 
       await timeout(4000);
 
       const users: IUser[] = await get(result._id);
-      console.log(users);
       setShowForm(false);
       setShowSignedUp(true);
     } catch {
