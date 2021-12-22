@@ -1,13 +1,6 @@
-import { FORM_INPUT_IDS, FORM_INPUT_NAMES, MESSAGES } from './constants';
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { FORM_INPUT_NAMES, MESSAGES } from './constants';
+import { render, screen, waitFor } from '@testing-library/react';
 
-import IUser from './interfaces/IUser';
 import SignUpForm from './components/SignUpForm';
 import { timeout } from './helper';
 import userEvent from '@testing-library/user-event';
@@ -23,29 +16,25 @@ const {
   PASSWORD_VALIDATE,
 } = ERRORS;
 
-const { FIRST_NAME, LAST_NAME, EMAIL, PASSWORD } = FORM_INPUT_NAMES;
+const { FIRST_NAME, LAST_NAME, EMAIL } = FORM_INPUT_NAMES;
 
 jest.mock('./api/users', () => ({
   post: () =>
-    new Promise<IUser>((res, rej) => {
-      res({
+    Promise.resolve({
+      firstName: 'string',
+      lastName: 'string',
+      email: 'string',
+      _id: 'string',
+    }),
+  get: () =>
+    Promise.resolve([
+      {
         firstName: 'string',
         lastName: 'string',
         email: 'string',
         _id: 'string',
-      });
-    }),
-  get: () =>
-    new Promise<IUser[]>((res, rej) => {
-      res([
-        {
-          firstName: 'string',
-          lastName: 'string',
-          email: 'string',
-          _id: 'string',
-        },
-      ]);
-    }),
+      },
+    ]),
 }));
 
 jest.setTimeout(60000);
@@ -64,15 +53,6 @@ describe('SignUpForm component', () => {
   });
 
   it('shows email is invalid when email has no @', async () => {
-    // const { getByTestId } = render(<SignUpForm />);
-    // const emailInput: any = getByTestId(FORM_INPUT_IDS.EMAIL);
-    // userEvent.type(emailInput, 'test');
-    // userEvent.click(screen.getByText(/Sign Up/i));
-    // await waitFor(() => {
-    //   expect(screen.getByText(EMAIL_INVALID)).toBeInTheDocument();
-    //   screen.debug();
-    // });
-
     const { getByPlaceholderText } = render(<SignUpForm />);
     const emailInput = getByPlaceholderText(EMAIL);
     userEvent.type(emailInput, 'test');

@@ -11,14 +11,14 @@ const post = async (data: ISignUpForm): Promise<IUser> => {
     },
     body: JSON.stringify(data),
   });
-  return await rawResponse.json();
+  return rawResponse.json();
 };
 
 const get = async (id: string): Promise<IUser[]> => {
   const rawResponse = await fetch(`${API_ENDPOINTS.USERS}?_id=${id}`, {
     method: 'GET',
   });
-  return await rawResponse.json();
+  return rawResponse.json();
 };
 
 export { post, get };

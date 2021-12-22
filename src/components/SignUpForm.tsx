@@ -35,7 +35,7 @@ export default function SignUpForm() {
 
       await timeout(4000);
 
-      const users: IUser[] = await get(result._id);
+      await get(result._id);
       setShowForm(false);
       setShowSignedUp(true);
     } catch {
